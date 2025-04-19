@@ -1,4 +1,4 @@
-# 🛠️ Sistema RH Interno - Arquitetura de Software
+## 🛠️ Sistema RH Interno - Arquitetura de Software
 
 Este projeto foi desenvolvido como solução para um sistema interno de **gestão de tarefas do RH** de uma grande empresa de automóveis. O foco é garantir **segurança, controle de acesso, e operação restrita à intranet corporativa**.
 
@@ -14,14 +14,83 @@ Este projeto foi desenvolvido como solução para um sistema interno de **gestã
 
 ---
 
-## 🔷 C4 Model - Diagrama de Contexto (C1)
+## 🔷 Diagrama de Contexto (C1)
 
 ```mermaid
-C4Context
-title Sistema RH Interno - Diagrama de Contexto
+graph TD
+    RH[Funcionário do RH] -->|Acessa via Intranet| Sistema[<b>Sistema RH Interno</b><br/>Gerencia tarefas do RH<br/>Acesso interno e seguro]
+```
 
-Person(rh_employee, "Funcionário do RH", "Gerencia tarefas e dados internos do departamento de RH")
+---
 
-System(system_rh, "Sistema RH Interno", "Web Application", "Sistema para controle e gestão de tarefas do RH, acessível somente dentro da intranet da empresa")
+## 🧱 Diagrama de Contêiner (C2)
 
-rh_employee --> system_rh : Acessa e utiliza para realizar tarefas diárias
+```mermaid
+graph TD
+    A[Funcionário do RH] --> B[Navegador Web (Thin Client)]
+    B --> C[Aplicação Backend - Spring Boot (Kotlin)]
+    C --> D[Camada de Autenticação - Spring Security]
+    C --> E[Banco de Dados Interno<br/>(PostgreSQL/Oracle)]
+```
+
+---
+
+## 🧩 Diagrama de Componentes (C3)
+
+```mermaid
+graph TD
+    Subsystem[Spring Boot App] --> Controller[Controllers - Spring Web]
+    Controller --> Service[Serviços - Lógica de Negócio]
+    Service --> Repository[Repositórios - Spring Data JPA]
+    Service --> Security[Segurança - JWT + Criptografia]
+```
+
+---
+
+## 🧬 Diagrama de Código (C4)
+
+```mermaid
+classDiagram
+    class UserController {
+        +createUser(request: UserDTO): ResponseEntity<UserDTO>
+        +getUser(id: Long): ResponseEntity<UserDTO>
+        +login(credentials: LoginDTO): ResponseEntity<TokenDTO>
+    }
+
+    class UserService {
+        +createUser(userDTO: UserDTO): User
+        +getUserById(id: Long): User
+        +authenticate(loginDTO: LoginDTO): TokenDTO
+    }
+
+    class UserRepository {
+        +findById(id: Long): Optional<User>
+        +findByUsername(username: String): Optional<User>
+        +save(user: User): User
+    }
+
+    class User {
+        -id: Long
+        -username: String
+        -password: String
+        -role: String
+    }
+
+    class LoginDTO {
+        -username: String
+        -password: String
+    }
+
+    class TokenDTO {
+        -token: String
+        -expiresIn: Long
+    }
+
+    UserController --> UserService
+    UserService --> UserRepository
+    UserRepository --> User
+    UserService --> LoginDTO
+    UserService --> TokenDTO
+```
+
+---
